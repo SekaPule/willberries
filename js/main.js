@@ -86,11 +86,9 @@ const cart = {
 		this.updateCartCounter();
 	},
 	updateCartCounter(){
-		 const cartCounter = this.cartGoods.reduce((acc, item) => {
-			console.log(item);
+		cartCount.textContent = this.cartGoods.reduce((acc, item) => {
 			return acc + item.count;
 		}, 0);
-		cartCount.textContent = cartCounter;
 
 	},
 	addCartGoods(id){
@@ -229,9 +227,7 @@ navigationLink.forEach(function (link) {
 	link.addEventListener('click', event =>{
 		event.preventDefault();
 		const field = link.dataset.field;
-		console.log(field);
 		const value = link.textContent;
-		console.log(value);
 		filterCards(field,value);
 	})
 });
@@ -248,4 +244,34 @@ viewClothing.forEach(item=>{
 		event.preventDefault();
 		filterCards('category', 'Clothing');
 	});
+});
+
+const modalForm = document.querySelector('.modal-form');
+
+const postData = dataUser => fetch('server.php', {
+	method: 'POST',
+	body: dataUser,
+});
+
+modalForm.addEventListener('submit', event => {
+	event.preventDefault();
+	const formData = new FormData(modalForm);
+	formData.append('cart', JSON.stringify(cart.cartGoods));
+	postData(formData)
+		.then(response =>{
+			if(!response.ok){
+				throw new Error(response.status);
+			}
+			alert("Your order is sending. Wait");
+			console.log(response.statusText);
+		})
+		.catch(error =>{
+			alert("Error happen, try later");
+			console.error(error);
+		})
+		.finally(() => {
+			closeModal();
+			modalForm.reset();
+			cart.clearCart();
+		});
 });
